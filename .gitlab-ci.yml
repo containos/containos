@@ -25,7 +25,7 @@ cache:
   # Share cached downloads/intermediates across *all* jobs and branches
   key: "global"
   paths:
-    - /tmp/sstate-cache
+    - /tmp/sstate-cache/
     - /tmp/downloads/
 
 # This verifies the instructions in README.md work.  They must be kept
@@ -45,6 +45,9 @@ qemux86_build:
   script:
     - source ./init-build-env
     - MACHINE=qemux86 bitbake containos-image-base
+  artifacts:
+    paths:
+      - build/
 
 # TODO: share TMPDIR across bitbake builds
 qemuarm_build:
@@ -52,6 +55,9 @@ qemuarm_build:
   script:
     - source ./init-build-env
     - MACHINE=qemuarm bitbake containos-image-base
+  artifacts:
+    paths:
+      - build/
 
 qemux86_test:
   stage: test
@@ -59,10 +65,13 @@ qemux86_test:
     - source ./init-build-env
     - echo "INHERIT += \"testimage\"" >> conf/local.conf
     - MACHINE=qemux86 TEST_IMAGE=1 bitbake -c testimage containos-image-base
+  dependencies:
+    - qemux86_build
   artifacts:
-    - testimage/qemu_boot_log
-    - testimage/ssh_target_log
-    - temp/log.do_testimage
+    paths:
+      - testimage/qemu_boot_log
+      - testimage/ssh_target_log
+      - temp/log.do_testimage
 
 qemuarm_test:
   stage: test
@@ -70,10 +79,13 @@ qemuarm_test:
     - source ./init-build-env
     - echo "INHERIT += \"testimage\"" >> conf/local.conf
     - MACHINE=qemuarm TEST_IMAGE=1 bitbake -c testimage containos-image-base
+  dependencies:
+    - qemuarm_build
   artifacts:
-    - testimage/qemu_boot_log
-    - testimage/ssh_target_log
-    - temp/log.do_testimage
+    paths:
+      - testimage/qemu_boot_log
+      - testimage/ssh_target_log
+      - temp/log.do_testimage
 
 # potential other tests
 # - oelint for everything in meta-containos/recipes-*
