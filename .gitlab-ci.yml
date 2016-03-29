@@ -1,0 +1,86 @@
+before_script:
+  - apt-get update -qq
+  # Packages required for regular OpenEmbedded building
+  - >-
+    apt-get install -y -qq gawk wget git-core diffstat unzip
+    texinfo gcc-multilib build-essential chrpath libsdl1.2-dev xterm
+  # Additional packages required for qemu-based testing
+  - >-
+    apt-get install -y -qq sysstat iproute2
+
+stages:
+  - lint
+  - build
+  - test
+  - deploy
+
+variables:
+  OE_STRICT_CHECKSUMS: "1"
+  PATCH_RESOLVE: "noop"
+  DL_DIR: /tmp/downloads
+  SSTATE_DIR: /tmp/sstate-cache
+  BB_GENERATE_MIRROR_TARBALLS: "1"
+
+cache:
+  # Share cached downloads/intermediates across *all* jobs and branches
+  key: "global"
+  paths:
+    - /tmp/sstate-cache
+    - /tmp/downloads/
+
+# This verifies the instructions in README.md work.  They must be kept
+# in sync.
+quickstart:
+  stage: lint
+  script:
+    # Quickstart docs start up a directory, so verify init-build-env
+    # can be invoked from somewhere other than cwd.
+    - cd ..
+    - source containos/init-build-env
+    - MACHINE=bananapi bitbake --dry-run containos-image-base
+
+# TODO: share TMPDIR across bitbake builds
+qemux86_build:
+  stage: build
+  script:
+    - source ./init-build-env
+    - MACHINE=qemux86 bitbake containos-image-base
+
+# TODO: share TMPDIR across bitbake builds
+qemuarm_build:
+  stage: build
+  script:
+    - source ./init-build-env
+    - MACHINE=qemuarm bitbake containos-image-base
+
+qemux86_test:
+  stage: test
+  script:
+    - source ./init-build-env
+    - echo "INHERIT += \"testimage\"" >> conf/local.conf
+    - MACHINE=qemux86 TEST_IMAGE=1 bitbake -c testimage containos-image-base
+  artifacts:
+    - testimage/qemu_boot_log
+    - testimage/ssh_target_log
+    - temp/log.do_testimage
+
+qemuarm_test:
+  stage: test
+  script:
+    - source ./init-build-env
+    - echo "INHERIT += \"testimage\"" >> conf/local.conf
+    - MACHINE=qemuarm TEST_IMAGE=1 bitbake -c testimage containos-image-base
+  artifacts:
+    - testimage/qemu_boot_log
+    - testimage/ssh_target_log
+    - temp/log.do_testimage
+
+# potential other tests
+# - oelint for everything in meta-containos/recipes-*
+# - openembedded ptests
+# - run in qemu, test we can start a rkt image
+# - multiple architectures (via qemu)
+# - test booting / upgrading images (via qemu)
+#
+# See http://www.openembedded.org/wiki/TestingScript for some general
+# advice on running bitbake from tests.
