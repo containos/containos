@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# This is intended to be sourced, not executed:
+#  . ./init-build-env [builddir]
+#
+
+if [ -n "$BASH_SOURCE" ]; then
+   dir="`dirname $BASH_SOURCE`"
+elif [ -n "$ZSH_NAME" ]; then
+   dir="`dirname $0`"
+else
+   dir="`pwd`"
+fi
+
+BITBAKEDIR=$(readlink -f $dir/bitbake)
+export BITBAKEDIR
+
+TEMPLATECONF=$(readlink -f $dir/meta-containos/conf)
+export TEMPLATECONF
+
+. $dir/oe-core/oe-init-build-env "$@"
+unset dir
