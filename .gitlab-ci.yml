@@ -8,6 +8,7 @@ before_script:
   - >-
     apt-get install -y -qq sysstat iproute2
   - git submodule update --init --recursive
+  - adduser --disabled-password --home /build ciuser
 
 stages:
   - lint
@@ -34,59 +35,66 @@ cache:
 quickstart:
   stage: lint
   script:
-    # Quickstart docs start up a directory, so verify init-build-env
-    # can be invoked from somewhere other than cwd.
-    - cd ..
-    - source containos/init-build-env
-    - MACHINE=bananapi bitbake --dry-run containos-image-base
+    # Quickstart docs start in containos parent directory, but we're
+    # limited in what the CI environment lets us do.  This at least
+    # verifies that we can run init-build-env outside the current
+    # directory.
+    - cd /build
+    - export MACHINE=bananapi
+    - su -c 'set -xe; source $CI_PROJECT_DIR/init-build-env; bitbake --dry-run containos-image-base' ciuser
 
 # TODO: share TMPDIR across bitbake builds
 qemux86_build:
   stage: build
   script:
-    - source ./init-build-env
-    - MACHINE=qemux86 bitbake containos-image-base
+    - cd /build
+    - export MACHINE=qemux86
+    - su -c 'set -xe; source $CI_PROJECT_DIR/init-build-env; bitbake containos-image-base' ciuser
   artifacts:
     paths:
-      - build/
+      - /build/
 
 # TODO: share TMPDIR across bitbake builds
 qemuarm_build:
   stage: build
   script:
-    - source ./init-build-env
-    - MACHINE=qemuarm bitbake containos-image-base
+    - cd /build
+    - export MACHINE=qemuarm
+    - su -c 'set -xe; source $CI_PROJECT_DIR/init-build-env; bitbake containos-image-base' ciuser
   artifacts:
     paths:
-      - build/
+      - /build/
 
 qemux86_test:
   stage: test
   script:
-    - source ./init-build-env
-    - echo "INHERIT += \"testimage\"" >> conf/local.conf
-    - MACHINE=qemux86 TEST_IMAGE=1 bitbake -c testimage containos-image-base
+    - cd /build
+    - export MACHINE=qemux86
+    - export TEST_IMAGE=1
+    - su -c 'set -xe; source $CI_PROJECT_DIR/init-build-env; echo "INHERIT += \"testimage\"" >> conf/local.conf; bitbake -c testimage containos-image-base' ciuser
   dependencies:
     - qemux86_build
   artifacts:
     paths:
-      - testimage/qemu_boot_log
-      - testimage/ssh_target_log
-      - temp/log.do_testimage
+      - /build/testimage/qemu_boot_log
+      - /build/testimage/ssh_target_log
+      - /build/temp/log.do_testimage
 
 qemuarm_test:
   stage: test
   script:
-    - source ./init-build-env
-    - echo "INHERIT += \"testimage\"" >> conf/local.conf
-    - MACHINE=qemuarm TEST_IMAGE=1 bitbake -c testimage containos-image-base
+    - cd /build
+    - source $CI_PROJECT_DIR/init-build-env
+    - export MACHINE=qemuarm
+    - export TEST_IMAGE=1
+    - su -c 'set -xe; source $CI_PROJECT_DIR/init-build-env; echo "INHERIT += \"testimage\"" >> conf/local.conf; bitbake -c testimage containos-image-base' ciuser
   dependencies:
     - qemuarm_build
   artifacts:
     paths:
-      - testimage/qemu_boot_log
-      - testimage/ssh_target_log
-      - temp/log.do_testimage
+      - /build/testimage/qemu_boot_log
+      - /build/testimage/ssh_target_log
+      - /build/temp/log.do_testimage
 
 # potential other tests
 # - oelint for everything in meta-containos/recipes-*
