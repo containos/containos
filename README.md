@@ -2,7 +2,11 @@ ContainOS
 =========
 
 This is my homage to CoreOS, designed to support more architectures,
-be even smaller, and even more immutable.
+be even smaller, and even less mutable.
+
+This repository is a thin wrapper that pulls in other git submodules.
+Most of the ContainOS action actually occurs in the _meta-containos_
+layer hosted at https://gitlab.com/anguslees/meta-containos.git
 
 Quickstart
 ----------
