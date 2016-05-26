@@ -45,6 +45,7 @@ quickstart:
 
 # TODO: share TMPDIR across bitbake builds
 qemux86_build:
+  allow_failure: true  # This job takes longer than the hosted gitlab-ci limit (60 mins)
   stage: build
   script:
     - cd /build
@@ -56,6 +57,7 @@ qemux86_build:
 
 # TODO: share TMPDIR across bitbake builds
 qemuarm_build:
+  allow_failure: true  # This job takes longer than the hosted gitlab-ci limit (60 mins)
   stage: build
   script:
     - cd /build
