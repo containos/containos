@@ -6,7 +6,7 @@ before_script:
     texinfo gcc-multilib build-essential chrpath libsdl1.2-dev xterm cpio
   # Additional packages required for qemu-based testing
   - >-
-    apt-get install -y -qq sysstat iproute2
+    apt-get install -y -qq sysstat iproute2 vnc4server
   - git submodule update --init --recursive
   - adduser --disabled-password --home /build ciuser
 
@@ -68,12 +68,15 @@ qemuarm_build:
       - /build/
 
 qemux86_test:
+  allow_failure: true  # This job is still in testing
   stage: test
   script:
     - cd /build
+    - vncserver :1 &
+    - export DISPLAY=:1
     - export MACHINE=qemux86
     - export TEST_IMAGE=1
-    - su -c 'set -xe; source $CI_PROJECT_DIR/init-build-env; echo "INHERIT += \"testimage\"" >> conf/local.conf; bitbake -c testimage containos-image-base' ciuser
+    - su -c 'set -xe; source $CI_PROJECT_DIR/init-build-env; echo "INHERIT += \"testimage\"" >> $BUILDDIR/conf/local.conf; bitbake -c testimage containos-image-base' ciuser
   dependencies:
     - qemux86_build
   artifacts:
@@ -83,13 +86,15 @@ qemux86_test:
       - /build/temp/log.do_testimage
 
 qemuarm_test:
+  allow_failure: true  # This job is still in testing
   stage: test
   script:
     - cd /build
-    - source $CI_PROJECT_DIR/init-build-env
+    - vncserver :1 &
+    - export DISPLAY=:1
     - export MACHINE=qemuarm
     - export TEST_IMAGE=1
-    - su -c 'set -xe; source $CI_PROJECT_DIR/init-build-env; echo "INHERIT += \"testimage\"" >> conf/local.conf; bitbake -c testimage containos-image-base' ciuser
+    - su -c 'set -xe; source $CI_PROJECT_DIR/init-build-env; echo "INHERIT += \"testimage\"" >> $BUILDDIR/conf/local.conf; bitbake -c testimage containos-image-base' ciuser
   dependencies:
     - qemuarm_build
   artifacts:
