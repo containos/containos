@@ -9,8 +9,8 @@ before_script:
   - >-
     test $(id -u) == 0 &&
     apt-get install -y -qq sysstat iproute2 vnc4server
-  - git submodule update --init --recursive
   - test $(id -u) == 0 && adduser --disabled-password --home /build ciuser
+  - git submodule update --init --recursive
 
 stages:
   - lint
@@ -37,7 +37,8 @@ cache:
 quickstart:
   stage: lint
   tags:
-    - shared
+    - private
+    - linux
   variables:
     MACHINE: bananapi
   script:
@@ -55,6 +56,7 @@ quickstart:
   stage: build
   tags:
     - private
+    - linux
   script:
     - source $CI_PROJECT_DIR/init-build-env
     - bitbake containos-image-base
@@ -76,16 +78,17 @@ qemuarm_build:
   stage: test
   tags:
     - private
+    - linux
   variables:
     DISPLAY: ":1"
     TEST_IMAGE: 1
   script:
-    - vncserver :1 &  
-    - source $CI_PROJECT_DIR/init-build-env   
+    - vncserver :1 &
+    - source $CI_PROJECT_DIR/init-build-env
     - echo "INHERIT += \"testimage\"" >> $BUILDDIR/conf/local.conf
     - bitbake -c testimage containos-image-base
   artifacts:
-    paths: 
+    paths:
       - /build/testimage/qemu_boot_log
       - /build/testimage/ssh_target_log
       - /build/temp/log.do_testimage
