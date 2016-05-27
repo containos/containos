@@ -1,14 +1,16 @@
 before_script:
-  - apt-get update -qq
+  - test $(id -u) == 0 && apt-get update -qq
   # Packages required for regular OpenEmbedded building
   - >-
+    test $(id -u) == 0 &&
     apt-get install -y -qq gawk wget git-core diffstat unzip
     texinfo gcc-multilib build-essential chrpath libsdl1.2-dev xterm cpio
   # Additional packages required for qemu-based testing
   - >-
+    test $(id -u) == 0 &&
     apt-get install -y -qq sysstat iproute2 vnc4server
   - git submodule update --init --recursive
-  - adduser --disabled-password --home /build ciuser
+  - test $(id -u) == 0 && adduser --disabled-password --home /build ciuser
 
 stages:
   - lint
@@ -34,74 +36,75 @@ cache:
 # in sync.
 quickstart:
   stage: lint
+  tags:
+    - shared
+  variables:
+    MACHINE: bananapi
   script:
     # Quickstart docs start in containos parent directory, but we're
     # limited in what the CI environment lets us do.  This at least
     # verifies that we can run init-build-env outside the current
     # directory.
-    - cd /build
-    - export MACHINE=bananapi
-    - su -c 'set -xe; source $CI_PROJECT_DIR/init-build-env; bitbake --dry-run containos-image-base' ciuser
+    - cd /
+    - source $CI_PROJECT_DIR/init-build-env
+    - bitbake --dry-run containos-image-base
 
 # TODO: share TMPDIR across bitbake builds
+.machine_build: &machine_build
+  allow_failure: true  # This job takes longer than the hosted gitlab-ci limit (60 mins)
+  stage: build
+  tags:
+    - private
+  script:
+    - source $CI_PROJECT_DIR/init-build-env
+    - bitbake containos-image-base
+  artifacts:
+    paths:
+      - /build/
+
 qemux86_build:
-  allow_failure: true  # This job takes longer than the hosted gitlab-ci limit (60 mins)
-  stage: build
-  script:
-    - cd /build
-    - export MACHINE=qemux86
-    - su -c 'set -xe; source $CI_PROJECT_DIR/init-build-env; bitbake containos-image-base' ciuser
-  artifacts:
-    paths:
-      - /build/
+  <<: *machine_build
+  variables:
+    MACHINE: qemux86
 
-# TODO: share TMPDIR across bitbake builds
 qemuarm_build:
-  allow_failure: true  # This job takes longer than the hosted gitlab-ci limit (60 mins)
-  stage: build
+  <<: *machine_build
+  variables:
+    MACHINE: qemuarm
+
+.machine_test: &machine_test
+  stage: test
+  tags:
+    - private
+  variables:
+    DISPLAY: ":1"
+    TEST_IMAGE: 1
   script:
-    - cd /build
-    - export MACHINE=qemuarm
-    - su -c 'set -xe; source $CI_PROJECT_DIR/init-build-env; bitbake containos-image-base' ciuser
+    - vncserver :1 &  
+    - source $CI_PROJECT_DIR/init-build-env   
+    - echo "INHERIT += \"testimage\"" >> $BUILDDIR/conf/local.conf
+    - bitbake -c testimage containos-image-base
   artifacts:
-    paths:
-      - /build/
+    paths: 
+      - /build/testimage/qemu_boot_log
+      - /build/testimage/ssh_target_log
+      - /build/temp/log.do_testimage
 
 qemux86_test:
   allow_failure: true  # This job is still in testing
-  stage: test
-  script:
-    - cd /build
-    - vncserver :1 &
-    - export DISPLAY=:1
-    - export MACHINE=qemux86
-    - export TEST_IMAGE=1
-    - su -c 'set -xe; source $CI_PROJECT_DIR/init-build-env; echo "INHERIT += \"testimage\"" >> $BUILDDIR/conf/local.conf; bitbake -c testimage containos-image-base' ciuser
+  <<: *machine_test
+  variables:
+    MACHINE: qemux86
   dependencies:
     - qemux86_build
-  artifacts:
-    paths:
-      - /build/testimage/qemu_boot_log
-      - /build/testimage/ssh_target_log
-      - /build/temp/log.do_testimage
 
 qemuarm_test:
   allow_failure: true  # This job is still in testing
-  stage: test
-  script:
-    - cd /build
-    - vncserver :1 &
-    - export DISPLAY=:1
-    - export MACHINE=qemuarm
-    - export TEST_IMAGE=1
-    - su -c 'set -xe; source $CI_PROJECT_DIR/init-build-env; echo "INHERIT += \"testimage\"" >> $BUILDDIR/conf/local.conf; bitbake -c testimage containos-image-base' ciuser
+  <<: *machine_test
+  variables:
+    MACHINE: qemuarm
   dependencies:
     - qemuarm_build
-  artifacts:
-    paths:
-      - /build/testimage/qemu_boot_log
-      - /build/testimage/ssh_target_log
-      - /build/temp/log.do_testimage
 
 # potential other tests
 # - oelint for everything in meta-containos/recipes-*
