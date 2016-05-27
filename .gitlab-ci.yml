@@ -1,4 +1,5 @@
 before_script:
+  - set -x -e
   - test $(id -u) == 0 && apt-get update -qq
   # Packages required for regular OpenEmbedded building
   - >-
@@ -46,7 +47,8 @@ quickstart:
     # limited in what the CI environment lets us do.  This at least
     # verifies that we can run init-build-env outside the current
     # directory.
-    - cd /
+    - mkdir build-tmp
+    - cd build-tmp
     - source $CI_PROJECT_DIR/init-build-env
     - bitbake --dry-run containos-image-base
 
