@@ -98,7 +98,7 @@ qemux86_test:
   variables:
     MACHINE: qemux86
     DISPLAY: ":1"
-    TEST_IMAGE: 1
+    TEST_IMAGE: "1"
   dependencies:
     - qemux86_build
 
@@ -108,7 +108,7 @@ qemuarm_test:
   variables:
     MACHINE: qemuarm
     DISPLAY: ":1"
-    TEST_IMAGE: 1
+    TEST_IMAGE: "1"
   dependencies:
     - qemuarm_build
 
