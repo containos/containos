@@ -22,16 +22,16 @@ stages:
 variables:
   OE_STRICT_CHECKSUMS: "1"
   PATCH_RESOLVE: "noop"
-  DL_DIR: /tmp/downloads
-  SSTATE_DIR: /tmp/sstate-cache
+  DL_DIR: /var/cache/gitlab-ci/downloads
+  SSTATE_DIR: /var/cache/gitlab-ci/sstate-cache
   BB_GENERATE_MIRROR_TARBALLS: "1"
 
 cache:
   # Share cached downloads/intermediates across *all* jobs and branches
   key: "global"
   paths:
-    - /tmp/sstate-cache/
-    - /tmp/downloads/
+    - /var/cache/gitlab-ci/sstate-cache/
+    - /var/cache/gitlab-ci/downloads/
 
 # This verifies the instructions in README.md work.  They must be kept
 # in sync.
@@ -64,7 +64,7 @@ quickstart:
     - bitbake containos-image-base
   artifacts:
     paths:
-      - /build/
+      - build/
 
 qemux86_build:
   <<: *machine_build
@@ -88,9 +88,9 @@ qemuarm_build:
     - bitbake -c testimage containos-image-base
   artifacts:
     paths:
-      - /build/testimage/qemu_boot_log
-      - /build/testimage/ssh_target_log
-      - /build/temp/log.do_testimage
+      - build/testimage/qemu_boot_log
+      - build/testimage/ssh_target_log
+      - build/temp/log.do_testimage
 
 qemux86_test:
   allow_failure: true  # This job is still in testing
