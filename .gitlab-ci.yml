@@ -61,6 +61,7 @@ quickstart:
     - linux
   script:
     - source $CI_PROJECT_DIR/init-build-env
+    - test -r /etc/openembedded/site.conf && cp /etc/openembedded/site.conf $BUILDDIR/conf/site.conf
     - bitbake containos-image-base
   artifacts:
     paths:
@@ -84,6 +85,7 @@ qemuarm_build:
   script:
     - vncserver :1 &
     - source $CI_PROJECT_DIR/init-build-env
+    - test -r /etc/openembedded/site.conf && cp /etc/openembedded/site.conf $BUILDDIR/conf/site.conf
     - echo "INHERIT += \"testimage\"" >> $BUILDDIR/conf/local.conf
     - bitbake -c testimage containos-image-base
   artifacts:
