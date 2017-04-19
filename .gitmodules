@@ -1,24 +1,24 @@
 [submodule "meta-openembedded"]
 	path = meta-openembedded
 	url = https://github.com/openembedded/meta-openembedded.git
-	branch = jethro
+	branch = morty
 [submodule "meta-sunxi"]
 	path = meta-sunxi
 	url = https://github.com/linux-sunxi/meta-sunxi
-	branch = jethro
+	branch = morty
 [submodule "oe-core"]
 	path = oe-core
 	url = git://git.openembedded.org/openembedded-core
-	branch = jethro
+	branch = morty
 [submodule "bitbake"]
 	path = bitbake
 	url = git://git.openembedded.org/bitbake
-	branch = 1.28
+	branch = 1.32
 [submodule "meta-containos"]
 	path = meta-containos
 	url = https://gitlab.com/anguslees/meta-containos.git
-	branch = jethro
-[submodule "meta-virtualization"]
-	path = meta-virtualization
-	url = git://git.yoctoproject.org/meta-virtualization
-	branch = jethro
+	branch = morty
+[submodule "meta-go"]
+	path = meta-go
+	#url = https://github.com/mem/oe-meta-go.git
+	url = https://github.com/anguslees/oe-meta-go.git
