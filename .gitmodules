@@ -16,7 +16,7 @@
 	branch = 1.32
 [submodule "meta-containos"]
 	path = meta-containos
-	url = https://gitlab.com/anguslees/meta-containos.git
+	url = ../meta-containos.git
 	branch = morty
 [submodule "meta-go"]
 	path = meta-go
