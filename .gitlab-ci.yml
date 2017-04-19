@@ -31,12 +31,12 @@ stages:
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-  GIT_DEPTH: 100
+  GIT_DEPTH: "100"
 
   # Allow some retrying by gitlab-ci
-  GET_SOURCES_ATTEMPTS: 3
-  ARTIFACT_DOWNLOAD_ATTEMPTS: 3
-  RESTORE_CACHE_ATTEMPTS: 3
+  GET_SOURCES_ATTEMPTS: "3"
+  ARTIFACT_DOWNLOAD_ATTEMPTS: "3"
+  RESTORE_CACHE_ATTEMPTS: "3"
 
   # bitbake needs a utf-8 locale
   LANG: "en_US.UTF-8"
