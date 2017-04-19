@@ -5,7 +5,8 @@ before_script:
   - >-
     test $(id -u) == 0 &&
     apt-get install -y -qq gawk wget git-core diffstat unzip python3
-    texinfo gcc-multilib build-essential chrpath libsdl1.2-dev xterm cpio
+    texinfo gcc-multilib build-essential chrpath libsdl1.2-dev xterm
+    cpio locales
   # Additional packages required for qemu-based testing
   - >-
     test $(id -u) == 0 &&
