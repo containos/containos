@@ -18,3 +18,7 @@
 	path = meta-containos
 	url = ../meta-containos.git
 	branch = rocko
+[submodule "meta-rauc"]
+	path = meta-rauc
+	url = https://github.com/rauc/meta-rauc.git
+	branch = rocko
