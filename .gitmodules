@@ -16,7 +16,7 @@
 	branch = 1.36
 [submodule "meta-containos"]
 	path = meta-containos
-	url = ../meta-containos.git
+	url = https://gitlab.com/containos/meta-containos.git
 	branch = rocko
 [submodule "meta-rauc"]
 	path = meta-rauc
