@@ -1,15 +1,15 @@
 [submodule "meta-openembedded"]
 	path = meta-openembedded
 	url = https://github.com/openembedded/meta-openembedded.git
-	branch = rocko
+	branch = sumo
 [submodule "meta-sunxi"]
 	path = meta-sunxi
 	url = https://github.com/linux-sunxi/meta-sunxi
-	branch = master
+	branch = sumo
 [submodule "oe-core"]
 	path = oe-core
 	url = git://git.openembedded.org/openembedded-core
-	branch = rocko
+	branch = sumo
 [submodule "bitbake"]
 	path = bitbake
 	url = git://git.openembedded.org/bitbake
@@ -17,8 +17,8 @@
 [submodule "meta-containos"]
 	path = meta-containos
 	url = https://gitlab.com/containos/meta-containos.git
-	branch = rocko
+	branch = master
 [submodule "meta-rauc"]
 	path = meta-rauc
 	url = https://github.com/rauc/meta-rauc.git
-	branch = rocko
+	branch = sumo
